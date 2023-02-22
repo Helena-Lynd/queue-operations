@@ -1,11 +1,9 @@
-            TTL CMPE-250 Exercise 9
+            TTL Queue Operations
 ;****************************************************************
 ;This program interfaces with the user from a terminal window,
 ;taking commands from the keyboard to perform queue operations.
 ;Name:  Helena Lynd
 ;Date:  10/5/22
-;Class:  CMPE-250
-;Section:  Section 03, Wednesday 5:00-6:50 PM
 ;---------------------------------------------------------------
 ;Keil Template for KL05
 ;R. W. Melton
@@ -13,11 +11,11 @@
 ;****************************************************************
 ;Assembler directives
             THUMB
-            OPT    64  ;Turn on listing macro expansions
+            OPT    64 		;Turn on listing macro expansions
 ;****************************************************************
 ;Include files
-            GET  MKL05Z4.s     ;Included by start.s
-            OPT  1   ;Turn on listing
+            GET  MKL05Z4.s	;Included by start.s
+            OPT  1   		;Turn on listing
 ;****************************************************************
 ;EQUates
 
@@ -31,12 +29,12 @@ RDRF_MASK	EQU		2_00100000
 MAX_STRING	EQU		80
 
 ;Characters
-CR          EQU  0x0D
-LF          EQU  0x0A
-NULL        EQU  0x00
-LESS_THAN_SYM	EQU	 0x3C
-GREATER_THAN_SYM	EQU	0x3E
-COLON_CHAR  EQU  0x3A	
+CR         		EQU  0x0D
+LF          		EQU  0x0A
+NULL        		EQU  0x00
+LESS_THAN_SYM		EQU  0x3C
+GREATER_THAN_SYM	EQU  0x3E
+COLON_CHAR		EQU  0x3A	
 
 ; Queue management record field offsets
 IN_PTR      EQU   0
@@ -47,7 +45,7 @@ BUF_SIZE    EQU   16
 NUM_ENQD    EQU   17
 
 ; Queue structure sizes
-XQ_BUF_SZ	EQU	  80  ;Transmit and Receive Queue sizes
+XQ_BUF_SZ   EQU	  80  ;Transmit and Receive Queue sizes
 Q_BUF_SZ    EQU   4   ;Queue contents
 Q_REC_SZ    EQU   18  ;Queue management record
 ;---------------------------------------------------------------
@@ -225,7 +223,7 @@ UART0_S2_NO_RXINV_BRK10_NO_LBKDETECT_CLEAR_FLAGS  EQU  \
             ENTRY
             EXPORT  Reset_Handler
             IMPORT  Startup
-			IMPORT  LengthStringSB
+	    IMPORT  LengthStringSB
 Reset_Handler  PROC  {}
 main
 ;---------------------------------------------------------------
@@ -235,168 +233,168 @@ main
             BL      Startup
 ;---------------------------------------------------------------
 ;>>>>> begin main program code <<<<<
-			BL		Init_UART0_IRQ
+			BL	Init_UART0_IRQ
 			CPSIE	I
 			
-			LDR		R0,=QBuffer				;Initializes program queue to empty
-			LDR		R1,=QRecord
+			LDR	R0,=QBuffer		;Initializes program queue to empty
+			LDR	R1,=QRecord
 			MOVS	R2,#Q_BUF_SZ
-			BL		InitQueue
+			BL	InitQueue
 			
-			LDR		R0,=String1				;Initializes String1 to a NULL character
+			LDR	R0,=String1		;Initializes String1 to a NULL character
 			MOVS	R1,#NULL
 			STRB	R1,[R0,#0]
 			
-CodeSearch	LDR		R0,=prompt				;Prints prompt string
+CodeSearch		LDR	R0,=prompt		;Prints prompt string
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			BL		GetChar
-			CMP		R0, #0x61		;If Uppercase convert to lowercase
-			BMI		ToLower
+			BL	PutStringSB
+			BL	GetChar
+			CMP	R0, #0x61		;If Uppercase convert to lowercase
+			BMI	ToLower
 			MOVS	R1,R0
-BackIn		CMP		R0, #'d'
-			BEQ		Output
-			CMP		R0, #'e'   
-			BEQ		Output
-			CMP		R0, #'h'
-			BEQ		Output
-			CMP		R0, #'p'
-			BEQ		Output
-			CMP		R0,#'s'
-			BEQ		Output
-			B		CodeSearch
+BackIn			CMP	R0, #'d'
+			BEQ	Output
+			CMP	R0, #'e'   
+			BEQ	Output
+			CMP	R0, #'h'
+			BEQ	Output
+			CMP	R0, #'p'
+			BEQ	Output
+			CMP	R0,#'s'
+			BEQ	Output
+			B	CodeSearch
 			
-ToLower		MOVS	R1,R0
+ToLower			MOVS	R1,R0
 			ADDS	R0,R0, #0x20
-			B		BackIn
+			B	BackIn
 			
-ToUpper		SUBS	R0,R0,#0x20
-			B		Out2
+ToUpper			SUBS	R0,R0,#0x20
+			B	Out2
 			
-Output		MOVS	R2, R0
-			CMP		R1,#0x61      ;If Uppercase, print uppercase value
-			BMI		ToUpper
-Out2		BL		PutChar
+Output			MOVS	R2, R0
+			CMP	R1,#0x61	      ;If Uppercase, print uppercase value
+			BMI	ToUpper
+Out2			BL	PutChar
 			MOVS	R0,#CR
-			BL		PutChar
+			BL	PutChar
 			MOVS	R0,#LF
-			BL		PutChar
-			CMP		R2,#'d'
-			BEQ		DCode
-			CMP		R2,#'e'
-			BEQ		ECode
-			CMP		R2,#'h'
-			BEQ		HCode
-			CMP		R2,#'p'
-			BEQ		PCode
-			CMP		R2,#'s'
-			BEQ		SCode
+			BL	PutChar
+			CMP	R2,#'d'
+			BEQ	DCode
+			CMP	R2,#'e'
+			BEQ	ECode
+			CMP	R2,#'h'
+			BEQ	HCode
+			CMP	R2,#'p'
+			BEQ	PCode
+			CMP	R2,#'s'
+			BEQ	SCode
 
 
-DCode		LDR		R1,=QRecord
-			BL		Dequeue
-			BCS		DFailure
-			BL		PutChar
+DCode			LDR	R1,=QRecord
+			BL	Dequeue
+			BCS	DFailure
+			BL	PutChar
 			MOVS	R0,#COLON_CHAR
-			BL		PutChar
-			B		EndDCode
+			BL	PutChar
+			B	EndDCode
 			
-DFailure	LDR		R0,=failure				;Prints "Failure:"
+DFailure		LDR	R0,=failure		;Prints "Failure:"
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			B		EndDCode
+			BL	PutStringSB
+			B	EndDCode
 			
-EndDCode	B		StatusCode
+EndDCode		B	StatusCode
 			
 			
-ECode		LDR		R0,=promptEnq			;Prints "Character to enqueue:"
+ECode			LDR	R0,=promptEnq		;Prints "Character to enqueue:"
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			BL		GetChar
-			BL		PutChar
+			BL	PutStringSB
+			BL	GetChar
+			BL	PutChar
 			MOVS	R2,R0
-			MOVS	R0,#CR					;Prints carriage return
-			BL		PutChar
-			MOVS	R0,#LF					;Prints line feed
-			BL		PutChar
+			MOVS	R0,#CR			;Prints carriage return
+			BL	PutChar
+			MOVS	R0,#LF			;Prints line feed
+			BL	PutChar
 			MOVS	R0,R2
-			LDR		R1,=QRecord
-			BL		Enqueue
-			BCS		EFailure
-			LDR		R0,=success				;Prints "Success:"
+			LDR	R1,=QRecord
+			BL	Enqueue
+			BCS	EFailure
+			LDR	R0,=success		;Prints "Success:"
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			B		EndECode
+			BL	PutStringSB
+			B	EndECode
 			
-EFailure	LDR		R0,=failure				;Prints "Failure:"
+EFailure		LDR	R0,=failure		;Prints "Failure:"
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			B		EndECode
+			BL	PutStringSB
+			B	EndECode
 			
-EndECode	B		StatusCode			
+EndECode		B	StatusCode			
 			
 			
-HCode		LDR		R0,=promptHelp
+HCode			LDR	R0,=promptHelp
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			B		EndAndLoop
+			BL	PutStringSB
+			B	EndAndLoop
 
 			
-PCode		MOVS	R0,#GREATER_THAN_SYM
-			BL		PutChar
+PCode			MOVS	R0,#GREATER_THAN_SYM
+			BL	PutChar
 			
-			LDR		R1,=QRecord
+			LDR	R1,=QRecord
 			LDRB	R2,[R1,#NUM_ENQD]
-			LDR		R4,[R1,#OUT_PTR]
-			LDR		R5,[R1,#BUF_PAST]
+			LDR	R4,[R1,#OUT_PTR]
+			LDR	R5,[R1,#BUF_PAST]
 			
-PLoop		CMP		R2,#0					; if NumberEnqueued > 0
-			BEQ		EndPCode
-			LDRB	R0,[R4,#0]				;	Get queue item at OutPointer
-			BL		PutChar
-			SUBS	R2,R2,#1				;	Decrement NumberEnqueued
-			ADDS	R4,R4,#1				;	Increment OutPointer
-			CMP		R4,R5					;	if OutPointer >= BufferPast
-			BLO		PLoop
-			LDR		R4,[R1,#BUF_STRT]		;		Adjust OutPointer to BufferStart
-			B		PLoop
+PLoop			CMP	R2,#0			; if NumberEnqueued > 0
+			BEQ	EndPCode
+			LDRB	R0,[R4,#0]		;	Get queue item at OutPointer
+			BL	PutChar
+			SUBS	R2,R2,#1		;	Decrement NumberEnqueued
+			ADDS	R4,R4,#1		;	Increment OutPointer
+			CMP	R4,R5			;	if OutPointer >= BufferPast
+			BLO	PLoop
+			LDR	R4,[R1,#BUF_STRT]	;		Adjust OutPointer to BufferStart
+			B	PLoop
 			
-EndPCode	MOVS	R0,#LESS_THAN_SYM
-			BL		PutChar
-			B		EndAndLoop
+EndPCode		MOVS	R0,#LESS_THAN_SYM
+			BL	PutChar
+			B	EndAndLoop
 			
 			
 			
-SCode		LDR		R0,=status				;Prints "Status:"
+SCode			LDR	R0,=status		;Prints "Status:"
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			B		StatusCode
+			BL	PutStringSB
+			B	StatusCode
 
-StatusCode	LDR		R0,=in					;Prints "In=0x"
+StatusCode		LDR	R0,=in			;Prints "In=0x"
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			LDR		R1,=QRecord				;Prints InPointer
-			LDR		R0,[R1,#IN_PTR]
-			BL		PutNumHex
-			LDR		R0,=out					;Prints "Out=0x"
+			BL	PutStringSB
+			LDR	R1,=QRecord		;Prints InPointer
+			LDR	R0,[R1,#IN_PTR]
+			BL	PutNumHex
+			LDR	R0,=out			;Prints "Out=0x"
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			LDR		R1,=QRecord				;Prints OutPointer
-			LDR		R0,[R1,#OUT_PTR]
-			BL		PutNumHex
-			LDR		R0,=num					;Prints "Num="
+			BL	PutStringSB
+			LDR	R1,=QRecord		;Prints OutPointer
+			LDR	R0,[R1,#OUT_PTR]
+			BL	PutNumHex
+			LDR	R0,=num			;Prints "Num="
 			MOVS	R1,#MAX_STRING
-			BL		PutStringSB
-			LDR		R1,=QRecord				;Print number enqueued
+			BL	PutStringSB
+			LDR	R1,=QRecord		;Print number enqueued
 			LDRB	R0,[R1,#NUM_ENQD]		
-			BL		PutNumUB
-			B		EndAndLoop
+			BL	PutNumUB
+			B	EndAndLoop
 
-EndAndLoop	MOVS	R0,#CR					;Prints carriage return
-			BL		PutChar
-			MOVS	R0,#LF					;Prints line feed
-			BL		PutChar
-			B		CodeSearch
+EndAndLoop		MOVS	R0,#CR			;Prints carriage return
+			BL	PutChar
+			MOVS	R0,#LF			;Prints line feed
+			BL	PutChar
+			B	CodeSearch
 			
 ;>>>>>   end main program code <<<<<
 ;Stay here
@@ -416,51 +414,51 @@ Init_UART0_IRQ	PROC	{R0-R13}
 			PUSH	{R0-R3,LR}
 			
 			;Init Receive Queue
-			LDR		R0,=RxQBuffer
-			LDR		R1,=RxQRecord
+			LDR	R0,=RxQBuffer
+			LDR	R1,=RxQRecord
 			MOVS	R2,#XQ_BUF_SZ
-			BL		InitQueue
+			BL	InitQueue
 			;Init Transmit Queue
-			LDR		R0,=TxQBuffer
-			LDR		R1,=TxQRecord
+			LDR	R0,=TxQBuffer
+			LDR	R1,=TxQRecord
 			MOVS	R2,#XQ_BUF_SZ
-			BL		InitQueue
+			BL	InitQueue
 			
-														;Setting up SIM
-			LDR		R0,=SIM_SOPT2							;SIM_SOPT2
-			LDR		R1,=SIM_SOPT2_UART0SRC_MASK				;Want : 2_XXXX01XXXXXXXXXXXXXXXXXXXXXXXXXX
-			LDR		R2,[R0,#0]
+											;Setting up SIM
+			LDR	R0,=SIM_SOPT2							;SIM_SOPT2
+			LDR	R1,=SIM_SOPT2_UART0SRC_MASK						;Want : 2_XXXX01XXXXXXXXXXXXXXXXXXXXXXXXXX
+			LDR	R2,[R0,#0]
 			BICS	R2,R2,R1									;Clear bit 27
-			LDR		R1,=SIM_SOPT2_UART0SRC_MCGFLLCLK
+			LDR	R1,=SIM_SOPT2_UART0SRC_MCGFLLCLK
 			ORRS	R2,R2,R1									;Set bit 26
-			STR		R2,[R0,#0]								
-															;SIM_SOPT5
-			LDR		R0,=SIM_SOPT5								;Want : 2_00000000000000000000000000000000
-			LDR		R1,=SIM_SOPT5_UART0_EXTERN_MASK_CLEAR
-			LDR		R2,[R0,#0]
+			STR	R2,[R0,#0]								
+												;SIM_SOPT5
+			LDR	R0,=SIM_SOPT5								;Want : 2_00000000000000000000000000000000
+			LDR	R1,=SIM_SOPT5_UART0_EXTERN_MASK_CLEAR
+			LDR	R2,[R0,#0]
 			BICS	R2,R2,R1									;Clear all bits
-			STR		R2,[R0,#0]
-															;SIM_SCGC4
-			LDR		R0,=SIM_SCGC4								;Want : 2_XXXXXXXXXXXXXXXXXXXXX0XXXXXXXXXX
-			LDR		R1,=SIM_SCGC4_UART0_MASK
-			LDR		R2,[R0,#0]
+			STR	R2,[R0,#0]
+												;SIM_SCGC4
+			LDR	R0,=SIM_SCGC4								;Want : 2_XXXXXXXXXXXXXXXXXXXXX0XXXXXXXXXX
+			LDR	R1,=SIM_SCGC4_UART0_MASK
+			LDR	R2,[R0,#0]
 			ORRS	R2,R2,R1									;Set bit 10
-			STR		R2,[R0,#0]
-															;SIM_SCGC5
-			LDR		R0,=SIM_SCGC5								;Want : 2_XXXXXXXXXXXXXXXXXXXXX0XXXXXXXXXX
-			LDR		R1,=SIM_SCGC4_UART0_MASK
-			LDR		R2,[R0,#0]
+			STR	R2,[R0,#0]
+												;SIM_SCGC5
+			LDR	R0,=SIM_SCGC5								;Want : 2_XXXXXXXXXXXXXXXXXXXXX0XXXXXXXXXX
+			LDR	R1,=SIM_SCGC4_UART0_MASK
+			LDR	R2,[R0,#0]
 			ORRS	R2,R2,R1									;Set bit 10
-			STR		R2,[R0,#0]
-														;Setting up ports
-			LDR		R0,=PORTB_PCR2							;PCR 2
-			LDR		R1,=PORT_PCR_SET_PTB2_UART0_RX				;Want : 2_XXXXXXX0XXXXXXXXXXXXX010XXXXXXXX
-			STR		R1,[R0,#0]
-			LDR		R0,=PORTB_PCR1							;PCR 1
-			LDR		R1,=PORT_PCR_SET_PTB1_UART0_TX				;Want : 2_XXXXXXX0XXXXXXXXXXXXX010XXXXXXXX
-			STR		R1,[R0,#0]
-														;Setting up UART0
-			LDR		R0,=UART0_BASE							
+			STR	R2,[R0,#0]
+											;Setting up ports
+			LDR	R0,=PORTB_PCR2							;PCR 2
+			LDR	R1,=PORT_PCR_SET_PTB2_UART0_RX						;Want : 2_XXXXXXX0XXXXXXXXXXXXX010XXXXXXXX
+			STR	R1,[R0,#0]
+			LDR	R0,=PORTB_PCR1							;PCR 1
+			LDR	R1,=PORT_PCR_SET_PTB1_UART0_TX						;Want : 2_XXXXXXX0XXXXXXXXXXXXX010XXXXXXXX
+			STR	R1,[R0,#0]
+											;Setting up UART0
+			LDR	R0,=UART0_BASE							
 			MOVS	R1,#UART0_C2_T_R						;Disable UART0
 			LDRB	R2,[R0,#UART0_C2_OFFSET]
 			BICS	R2,R2,R1
@@ -478,29 +476,29 @@ Init_UART0_IRQ	PROC	{R0-R13}
 			LDR 	R1,=NVIC_ISER_UART0_MASK
 			STR 	R1,[R0,#0]
 			
-			LDR		R0,=UART0_BASE
+			LDR	R0,=UART0_BASE
 			MOVS	R1,#UART0_BDH_9600						;UART0_BDH and UART0_BDL
 			STRB	R1,[R0,#UART0_BDH_OFFSET]					;Set baud rate to 9600
 			MOVS	R1,#UART0_BDL_9600
 			STRB	R1,[R0,#UART0_BDL_OFFSET]
 			MOVS	R1,#UART0_C1_8N1						;UART0_C1
-			STRB	R1,[R0,#UART0_C1_OFFSET]					;Want : 2_00X0000X
-			MOVS	R1,#UART0_C3_NO_TXINV					;UART_C3
-			STRB	R1,[R0,#UART0_C3_OFFSET]					;Want : 2_XXX00000
-			MOVS	R1,#UART0_C4_NO_MATCH_OSR_16			;UART_C4
-			STRB	R1,[R0,#UART0_C4_OFFSET]					;Want : 2_00001111
-			MOVS	R1,#UART0_C5_NO_DMA_SSR_SYNC			;UART_C5
-			STRB	R1,[R0,#UART0_C5_OFFSET]					;Want : 2_00000000
-			MOVS	R1,#UART0_S1_CLEAR_FLAGS				;UART_S1
-			STRB	R1,[R0,#UART0_S1_OFFSET]					;Clear flags
-			MOVS	R1,#UART0_S2_NO_RXINV_BRK10_NO_LBKDETECT_CLEAR_FLAGS	;UART_S2
-			STRB	R1,[R0,#UART0_S2_OFFSET]									;Clear flags
-			MOVS	R1,#UART0_C2_T_RI						;Enable UART0 with receive interrupts
+			STRB	R1,[R0,#UART0_C1_OFFSET]						;Want : 2_00X0000X
+			MOVS	R1,#UART0_C3_NO_TXINV						;UART_C3
+			STRB	R1,[R0,#UART0_C3_OFFSET]						;Want : 2_XXX00000
+			MOVS	R1,#UART0_C4_NO_MATCH_OSR_16					;UART_C4
+			STRB	R1,[R0,#UART0_C4_OFFSET]						;Want : 2_00001111
+			MOVS	R1,#UART0_C5_NO_DMA_SSR_SYNC					;UART_C5
+			STRB	R1,[R0,#UART0_C5_OFFSET]						;Want : 2_00000000
+			MOVS	R1,#UART0_S1_CLEAR_FLAGS					;UART_S1
+			STRB	R1,[R0,#UART0_S1_OFFSET]						;Clear flags
+			MOVS	R1,#UART0_S2_NO_RXINV_BRK10_NO_LBKDETECT_CLEAR_FLAGS		;UART_S2
+			STRB	R1,[R0,#UART0_S2_OFFSET]						;Clear flags
+			MOVS	R1,#UART0_C2_T_RI					;Enable UART0 with receive interrupts
 			STRB	R1,[R0,#UART0_C2_OFFSET]
 			
-			POP		{R0-R3,PC}
+			POP	{R0-R3,PC}
 			
-			;BX		LR
+			;BX	LR
 			ENDP
 			LTORG
 ;****************************************************************				
@@ -521,33 +519,33 @@ UART0_ISR	PROC	{}
 			CPSID	I
 			PUSH	{R4,LR}
 			
-			LDR		R2,=UART0_BASE
-			LDRB	R3,[R2,#UART0_C2_OFFSET]    	;Loads C2
+			LDR	R2,=UART0_BASE
+			LDRB	R3,[R2,#UART0_C2_OFFSET]    		;Loads C2
 			MOVS	R4,#UART0_C2_TI_RI								
 			ANDS	R3,R3,R4
-			BEQ		NextISR     		           	;if (TIE in UART_C2 = 1)
+			BEQ	NextISR     		           	;if (TIE in UART_C2 = 1)
 			LDRB	R3,[R2,#UART0_S1_OFFSET]  		;	if (TDRE is 1)	 
 			MOVS	R4,#UART0_S1_TDRE_MASK
-			ANDS	R3,R3,R4						;		
-			BEQ		NextISR
-			LDR		R1,=TxQRecord					;		Dequeue from TxQueue
-			BL		Dequeue							;		
-			BCS		DisTxISR						;		if dequeue success
+			ANDS	R3,R3,R4						
+			BEQ	NextISR
+			LDR	R1,=TxQRecord				;		Dequeue from TxQueue
+			BL	Dequeue							
+			BCS	DisTxISR				;		if dequeue success
 			STRB	R0,[R2,#UART0_D_OFFSET]			;			Write data to UART data register
-			B		NextISR
-DisTxISR	MOVS	R4,#UART0_C2_T_RI				;		else
+			B	NextISR
+DisTxISR		MOVS	R4,#UART0_C2_T_RI			;		else
 			STRB	R4,[R2,#UART0_C2_OFFSET]		;			Disable transmit
 
-NextISR		MOVS	R4,#UART0_S1_RDRF_MASK			;if (RDRF is 1)
+NextISR			MOVS	R4,#UART0_S1_RDRF_MASK			;if (RDRF is 1)
 			LDRB	R3,[R2,#UART0_S1_OFFSET]
 			ANDS	R3,R3,R4						
-			BEQ		EndISR
+			BEQ	EndISR
 			LDRB	R0,[R2,#UART0_D_OFFSET]			;	Read from data register
-			LDR		R1,=RxQRecord
-			BL		Enqueue
+			LDR	R1,=RxQRecord
+			BL	Enqueue
 
-EndISR		CPSIE	I
-			POP		{R4,PC}
+EndISR			CPSIE	I
+			POP	{R4,PC}
 			ENDP
 ;****************************************************************
 InitQueue	PROC	{R0-R14}
@@ -565,17 +563,17 @@ InitQueue	PROC	{R0-R14}
 
 			ALIGN
 
-			STR		R0,[R1,#IN_PTR]
-			STR		R0,[R1,#OUT_PTR]
-			STR		R0,[R1,#BUF_STRT]
+			STR	R0,[R1,#IN_PTR]
+			STR	R0,[R1,#OUT_PTR]
+			STR	R0,[R1,#BUF_STRT]
 			ADDS	R0,R0,R2
-			STR		R0,[R1,#BUF_PAST]
+			STR	R0,[R1,#BUF_PAST]
 			STRB	R2,[R1,#BUF_SIZE]
 			MOVS	R0,#0
 			STRB	R0,[R1,#NUM_ENQD]
 
-			POP		{R0-R2}
-			BX		LR
+			POP	{R0-R2}
+			BX	LR
 			ENDP
 ;****************************************************************
 Enqueue		PROC	{R0-R14}
@@ -597,40 +595,40 @@ Enqueue		PROC	{R0-R14}
 ;****************************************************************
 			PUSH	{R0-R7}
 
-			LDRB	R2,[R1,#NUM_ENQD]		; Value of NumberEnqueued
-			LDRB	R3,[R1,#BUF_SIZE]		; Value of Buffer Size
-			LDR		R4,[R1,#IN_PTR]			; Memory address stored in InPointer
-			LDR		R5,[R1,#BUF_PAST]		; Memory address one past end of buffer
+			LDRB	R2,[R1,#NUM_ENQD]			; Value of NumberEnqueued
+			LDRB	R3,[R1,#BUF_SIZE]			; Value of Buffer Size
+			LDR	R4,[R1,#IN_PTR]				; Memory address stored in InPointer
+			LDR	R5,[R1,#BUF_PAST]			; Memory address one past end of buffer
 			
-			CMP		R2,R3					; if NumberEnqueued < BufferSize 
-			BHS		Full
+			CMP	R2,R3					; if NumberEnqueued < BufferSize 
+			BHS	Full
 			STRB	R0,[R4,#0]				;	Put new element at memory location pointed by InPointer
 			ADDS	R2,R2,#1				;	Increment NumberEnqueued
 			STRB	R2,[R1,#NUM_ENQD]		
 			ADDS	R4,R4,#1				;	Increment InPointer
-			CMP		R4,R5					;	if InPointer >= BufferPast
-			BLO		SetEnqSucc				;
-			LDR		R4,[R1,#BUF_STRT]		;		Adjust InPointer to start of QueueBuffer
-			B		SetEnqSucc
+			CMP	R4,R5					;	if InPointer >= BufferPast
+			BLO	SetEnqSucc				;
+			LDR	R4,[R1,#BUF_STRT]			;		Adjust InPointer to start of QueueBuffer
+			B	SetEnqSucc
 			
 			
-SetEnqSucc	STR		R4,[R1,#IN_PTR]			; Store updated value of InPointer				
-			MRS		R6, APSR				; Clear C flag
-			LDR		R7,=APSR_C_MASK
+SetEnqSucc		STR	R4,[R1,#IN_PTR]				; Store updated value of InPointer				
+			MRS	R6, APSR					; Clear C flag
+			LDR	R7,=APSR_C_MASK
 			BICS	R6,R6,R7
-			MSR		APSR, R6
-			B		EndEnq
+			MSR	APSR, R6
+			B	EndEnq
 						
-											; else
-Full		MRS		R6, APSR				; 	Set C flag
-			LDR		R7,=APSR_C_MASK	
+									; else
+Full			MRS	R6, APSR				; 	Set C flag
+			LDR	R7,=APSR_C_MASK	
 			ORRS	R6,R6,R7
-			MSR		APSR, R6
-			B		EndEnq
+			MSR	APSR, R6
+			B	EndEnq
 
 
-EndEnq		POP		{R0-R7}
-			BX		LR
+EndEnq			POP	{R0-R7}
+			BX	LR
 			ENDP
 ;****************************************************************
 Dequeue		PROC	{R1-R14}
@@ -654,37 +652,37 @@ Dequeue		PROC	{R1-R14}
 
 			LDRB	R2,[R1,#NUM_ENQD]
 			LDRB	R3,[R1,#BUF_SIZE]
-			LDR		R4,[R1,#OUT_PTR]
-			LDR		R5,[R1,#BUF_PAST]
+			LDR	R4,[R1,#OUT_PTR]
+			LDR	R5,[R1,#BUF_PAST]
 			
-			CMP		R2,#0					; if NumberEnqueued > 0
-			BLS		Empty
+			CMP	R2,#0					; if NumberEnqueued > 0
+			BLS	Empty
 			LDRB	R0,[R4,#0]				;	Get queue item at OutPointer
 			SUBS	R2,R2,#1				;	Decrement NumberEnqueued
 			STRB	R2,[R1,#NUM_ENQD]
 			ADDS	R4,R4,#1				;	Increment OutPointer
-			CMP		R4,R5					;	if OutPointer >= BufferPast
-			BLO		SetDeqSucc
-			LDR		R4,[R1,#BUF_STRT]		;		Adjust OutPointer to BufferStart
-			B		SetDeqSucc
+			CMP	R4,R5					;	if OutPointer >= BufferPast
+			BLO	SetDeqSucc
+			LDR	R4,[R1,#BUF_STRT]			;		Adjust OutPointer to BufferStart
+			B	SetDeqSucc
 			
 										
-SetDeqSucc	STR		R4,[R1,#OUT_PTR]		; Store updated value of OutPointer
-			MRS		R6, APSR				; Clear C flag
-			LDR		R7,=APSR_C_MASK
+SetDeqSucc		STR	R4,[R1,#OUT_PTR]			; Store updated value of OutPointer
+			MRS	R6, APSR					; Clear C flag
+			LDR	R7,=APSR_C_MASK
 			BICS	R6,R6,R7
-			MSR		APSR, R6
-			B		EndDeq
+			MSR	APSR, R6
+			B	EndDeq
 						
-											; else
-Empty		MRS		R6, APSR				; 	Set C flag
-			LDR		R7,=APSR_C_MASK	
+									; else
+Empty			MRS	R6, APSR				; 	Set C flag
+			LDR	R7,=APSR_C_MASK	
 			ORRS	R6,R6,R7
-			MSR		APSR, R6
-			B		EndDeq
+			MSR	APSR, R6
+			B	EndDeq
 
-EndDeq		POP		{R1-R7}
-			BX		LR
+EndDeq			POP	{R1-R7}
+			BX	LR
 			ENDP
 ;****************************************************************
 PutNumHex	PROC	{R0-R14}
@@ -706,33 +704,33 @@ PutNumHex	PROC	{R0-R14}
 			MOVS	R2,#28
 			MOVS	R3,#LEAST_BYTE_MASK
 			
-LoopHex		MOVS	R0,R1
+LoopHex			MOVS	R0,R1
 			ASRS	R0,R0,R2
 			ANDS	R0,R0,R3
-			CMP		R0,#10
-			BHS		HexCodeConv
+			CMP	R0,#10
+			BHS	HexCodeConv
 			ADDS	R0,R0,#0x30
-BackHex		BL		PutChar
+BackHex			BL	PutChar
 			SUBS	R2,R2,#4
-			CMP		R2,#0
-			BEQ		EndHex
-			B		LoopHex
+			CMP	R2,#0
+			BEQ	EndHex
+			B	LoopHex
 
-HexCodeConv ADDS	R0,R0,#0x37
-			B		BackHex
+HexCodeConv 		ADDS	R0,R0,#0x37
+			B	BackHex
 
-EndHex		MOVS	R0,R1
+EndHex			MOVS	R0,R1
 			ANDS	R0,R0,R3
-			CMP		R0,#10
-			BHS		HexCode2
+			CMP	R0,#10
+			BHS	HexCode2
 			ADDS	R0,R0,#0x30
-BackHex2	BL		PutChar
-			B		EndHexConv
+BackHex2		BL	PutChar
+			B	EndHexConv
 
-HexCode2    ADDS	R0,R0,#0x37
-			B		BackHex2
+HexCode2    		ADDS	R0,R0,#0x37
+			B	BackHex2
 
-EndHexConv	POP		{R0-R3,PC}
+EndHexConv		POP	{R0-R3,PC}
 
 			ENDP
 ;****************************************************************
@@ -749,9 +747,9 @@ PutNumUB	PROC	{R0-R14}
 			
 			MOVS	R1,#LEAST_BYTE_MASK
 			ANDS	R0,R0,R1
-			BL		PutNumU
+			BL	PutNumU
 
-			POP		{R0,R1,PC}
+			POP	{R0,R1,PC}
 			ENDP
 ;****************************************************************
 GetStringSB	PROC	{R0-R14}
@@ -776,32 +774,32 @@ GetStringSB	PROC	{R0-R14}
 			MOVS	R3,R1					;Initialize R3
 			MOVS	R1,R0					;Initialize R1
 			MOVS	R2,#0					;Initialize R2
-			BL		GetChar					;Initialize R0
-			BL		PutChar
+			BL	GetChar					;Initialize R0
+			BL	PutChar
 			
-StartLoop	CMP		R2,R3					;Check if index (number of characters entered) has hit buffer limit
-			BEQ		BufferHit				;If it has, go to separate buffer loop
-			CMP		R0,#CR					
-			BEQ		EndLoop					;while(character != CR){
+StartLoop		CMP	R2,R3					;Check if index (number of characters entered) has hit buffer limit
+			BEQ	BufferHit				;If it has, go to separate buffer loop
+			CMP	R0,#CR					
+			BEQ	EndLoop					;while(character != CR){
 			STRB	R0,[R1,R2]				;	Store character, then increment pointer
 			ADDS	R2,R2,#1				;	GetChar
-			BL		GetChar					;}
-			BL		PutChar
-			B		StartLoop
+			BL	GetChar					;}
+			BL	PutChar
+			B	StartLoop
 			
-BufferHit	CMP		R0,#CR
-			BEQ		EndLoop
-			BL		GetChar
-			B		BufferHit
+BufferHit		CMP	R0,#CR
+			BEQ	EndLoop
+			BL	GetChar
+			B	BufferHit
 
-EndLoop		MOVS	R0,#NULL				;Store null character at current pointer
+EndLoop			MOVS	R0,#NULL				;Store null character at current pointer
 			STRB	R0,[R1,R2]
 			MOVS	R0,#CR					;Prints carriage return
-			BL		PutChar
+			BL	PutChar
 			MOVS	R0,#LF					;Prints line feed
-			BL		PutChar
+			BL	PutChar
 
-			POP		{R0-R3,PC}
+			POP	{R0-R3,PC}
 			ENDP
 ;****************************************************************
 PutStringSB	PROC	{R0-R14}
@@ -826,17 +824,17 @@ PutStringSB	PROC	{R0-R14}
 			MOVS	R2,#0					;Initialize R2
 			LDRB	R0,[R1,R2]				;Initialize R0
 
-WhileLoop	CMP		R2,R3					;Check if index (number of characters printed) has hit buffer limit
-			BEQ		EndWhileLoop			;If it has, break
-			CMP		R0,#NULL				;while(character != NULL){
-			BEQ		EndWhileLoop			;	PutChar
-			BL		PutChar					;	Read next character (increment pointer)
+WhileLoop		CMP	R2,R3					;Check if index (number of characters printed) has hit buffer limit
+			BEQ	EndWhileLoop				;If it has, break
+			CMP	R0,#NULL				;while(character != NULL){
+			BEQ	EndWhileLoop				;	PutChar
+			BL	PutChar					;	Read next character (increment pointer)
 			ADDS	R2,R2,#1				;}
 			LDRB	R0,[R1,R2]
-			B		WhileLoop
+			B	WhileLoop
 EndWhileLoop
 
-			POP		{R0-R3, PC}
+			POP	{R0-R3, PC}
 			ENDP
 ;****************************************************************
 PutNumU		PROC	{R0-R14}
@@ -854,36 +852,36 @@ PutNumU		PROC	{R0-R14}
 ;****************************************************************
 			PUSH	{R0-R3,LR}
 			
-			MOVS	R1,R0			;Initialize R1 to be dividend, input
-			MOVS	R0,#10			;Initialize R0 to be divisor, 10
-			MOVS	R2,#0			;Initialize R2
-			MOVS	R3,#'0'			;Initialize R3
+			MOVS	R1,R0					;Initialize R1 to be dividend, input
+			MOVS	R0,#10					;Initialize R0 to be divisor, 10
+			MOVS	R2,#0					;Initialize R2
+			MOVS	R3,#'0'					;Initialize R3
 
-			CMP		R1,#0
-			BEQ		IfZero
+			CMP	R1,#0
+			BEQ	IfZero
 			
-DivLoop		BL		DIVU			
-			BEQ		IfZero
+DivLoop			BL	DIVU			
+			BEQ	IfZero
 			PUSH	{R1}
 			MOVS	R1,R0					; Make quotient the new dividend (number to divide) 
 			MOVS	R0,#10					; Make 10 the new divisor (number by which to divide)
 			ADDS	R2,R2,#1				; Increment counter
-			B		DivLoop
+			B	DivLoop
 
-IfZero		PUSH	{R1}
+IfZero			PUSH	{R1}
 			ADDS	R2,R2,#1
-			B		PrintLoop
+			B	PrintLoop
 
-PrintLoop	CMP		R2,#0
-			BEQ		EndPrint
-			POP		{R0}
+PrintLoop		CMP	R2,#0
+			BEQ	EndPrint
+			POP	{R0}
 			ADDS	R0,R0,R3
-			BL		PutChar
+			BL	PutChar
 			SUBS	R2,R2,#1
-			B		PrintLoop
+			B	PrintLoop
 EndPrint
 			
-			POP		{R0-R3, PC}
+			POP	{R0-R3, PC}
 			ENDP
 ;***************************************************************
 GetChar		PROC	{R1-R13}
@@ -896,13 +894,13 @@ GetChar		PROC	{R1-R13}
 ;***************************************************************
 			PUSH	{R1,LR}
 			
-GetWhile	CPSID	I
-			LDR		R1,=RxQRecord
-			BL		Dequeue
+GetWhile		CPSID	I
+			LDR	R1,=RxQRecord
+			BL	Dequeue
 			CPSIE	I
-			BCS		GetWhile
+			BCS	GetWhile
 
-			POP		{R1,PC}
+			POP	{R1,PC}
 			ENDP
 ;***************************************************************
 PutChar		PROC	{R1-R13}
@@ -916,18 +914,18 @@ PutChar		PROC	{R1-R13}
 ;***************************************************************
 			PUSH	{R1-R2,LR}
 			
-PutWhile	CPSID	I
-			LDR		R1,=TxQRecord
-			BL		Enqueue
+PutWhile		CPSID	I
+			LDR	R1,=TxQRecord
+			BL	Enqueue
 			CPSIE	I
-			BCS		PutWhile
+			BCS	PutWhile
 			
 			;enable Tx Interrupt
 			MOVS	R1,#UART0_C2_TI_RI
-			LDR		R2,=UART0_BASE
+			LDR	R2,=UART0_BASE
 			STRB	R1,[R2,#UART0_C2_OFFSET]
 			
-			POP		{R1-R2,PC}
+			POP	{R1-R2,PC}
 			ENDP
 ;****************************************************************
 DIVU		PROC	{R2-R14}
@@ -947,46 +945,46 @@ DIVU		PROC	{R2-R14}
 ;****************************************************************
 			PUSH	{R3-R5}
 
-			CMP		R0, #0				;if (divisor == 0) {
-			BEQ		DivBy0				
+			CMP	R0, #0					;if (divisor == 0) {
+			BEQ	DivBy0				
 
-			CMP		R1, #0				;} else if (dividend == 0) {
-			BEQ		Div0				
-										;} else {
-			CMP		R1, R0				;	while (Dividend >= Divisor){
-			BLO		EndEarly			;		
+			CMP	R1, #0					;} else if (dividend == 0) {
+			BEQ	Div0				
+									;} else {
+			CMP	R1, R0					;	while (Dividend >= Divisor){
+			BLO	EndEarly				;		
 			MOVS	R3, #0
-while		SUBS	R1,R1,R0			;		Dividend = Dividend - Divisor
-			ADDS    R3,#1				;		Quotient = Quotient + 1
-			CMP		R1, R0				;	}
-			BHS		while				;}
-			MOVS    R0, R3				;
-			B		EndWhile							
+while			SUBS	R1,R1,R0				;		Dividend = Dividend - Divisor
+			ADDS    R3,#1					;		Quotient = Quotient + 1
+			CMP	R1, R0					;	}
+			BHS	while					;}
+			MOVS    R0, R3					
+			B	EndWhile							
 										
-DivBy0		MRS		R4, APSR			;Set C
-			LDR		R5,=APSR_C_MASK	
+DivBy0			MRS	R4, APSR				;Set C
+			LDR	R5,=APSR_C_MASK	
 			ORRS	R4,R4,R5
-			MSR		APSR, R4
-			B		EndSubR
+			MSR	APSR, R4
+			B	EndSubR
 			
-Div0		MOVS	R0,#0				;Set outputs to 0
+Div0			MOVS	R0,#0					;Set outputs to 0
 			MOVS	R1,#0
-			MRS		R4, APSR			;Set Z
-			LDR		R5,=APSR_Z_MASK
+			MRS	R4, APSR				;Set Z
+			LDR	R5,=APSR_Z_MASK
 			ORRS	R4,R4,R5
-			MSR		APSR, R4
-			B		EndWhile
+			MSR	APSR, R4
+			B	EndWhile
 			
-EndEarly	MOVS	R0,#0				;Set quotient (R0) to 0
-			B		EndWhile
+EndEarly		MOVS	R0,#0					;Set quotient (R0) to 0
+			B	EndWhile
 			
-EndWhile	MRS		R4, APSR			;Clear C
-			LDR		R5,=APSR_C_MASK
+EndWhile		MRS	R4, APSR				;Clear C
+			LDR	R5,=APSR_C_MASK
 			BICS	R4,R4,R5
-			MSR		APSR, R4
-			B		EndSubR
+			MSR	APSR, R4
+			B	EndSubR
 			
-EndSubR		POP     {R3-R5}
+EndSubR			POP     {R3-R5}
 			BX		LR
 			ENDP
 ;>>>>>   end subroutine code <<<<<
@@ -1072,9 +1070,9 @@ promptHelp	DCB			"D (dequeue), E (enqueue), H (help), P (print), S (status)\0"
 failure		DCB			"Failure:\0"
 success		DCB			"Success:\0"
 status		DCB			"Status:\0"
-in			DCB			"     In=0x\0"
-out			DCB			"     Out=0x\0"
-num			DCB			"     Num=\0"
+in		DCB			"     In=0x\0"
+out		DCB			"     Out=0x\0"
+num		DCB			"     Num=\0"
 ;>>>>>   end constants here <<<<<
             ALIGN
 ;****************************************************************
