@@ -252,8 +252,8 @@ CodeSearch		LDR	R0,=prompt		;Prints prompt string
 			CMP	R0, #0x61		;If Uppercase convert to lowercase
 			BMI	ToLower
 			MOVS	R1,R0
-BackIn			CMP	R0, #'d'
-			BEQ	Output
+BackIn			CMP	R0, #'d'		;if correct command
+			BEQ	Output			;	continue operation
 			CMP	R0, #'e'   
 			BEQ	Output
 			CMP	R0, #'h'
@@ -262,8 +262,8 @@ BackIn			CMP	R0, #'d'
 			BEQ	Output
 			CMP	R0,#'s'
 			BEQ	Output
-			B	CodeSearch
-			
+			B	CodeSearch		;else
+							;	loop back and ask for a new character to be input
 ToLower			MOVS	R1,R0
 			ADDS	R0,R0, #0x20
 			B	BackIn
@@ -272,30 +272,30 @@ ToUpper			SUBS	R0,R0,#0x20
 			B	Out2
 			
 Output			MOVS	R2, R0
-			CMP	R1,#0x61	      ;If Uppercase, print uppercase value
+			CMP	R1,#0x61		;If input character was uppercase, convert it back to uppercase
 			BMI	ToUpper
-Out2			BL	PutChar
+Out2			BL	PutChar			;Prints the user typed character to the screen so they can see it
 			MOVS	R0,#CR
 			BL	PutChar
 			MOVS	R0,#LF
 			BL	PutChar
-			CMP	R2,#'d'
+			CMP	R2,#'d'			;If command was "d", branch to dequeue section of code
 			BEQ	DCode
-			CMP	R2,#'e'
+			CMP	R2,#'e'			;If command was "e", branch to enqueue section of code
 			BEQ	ECode
-			CMP	R2,#'h'
+			CMP	R2,#'h'			;If command was "h", branch to help section of code
 			BEQ	HCode
-			CMP	R2,#'p'
+			CMP	R2,#'p'			;If command was "p", branch to print section of code
 			BEQ	PCode
-			CMP	R2,#'s'
+			CMP	R2,#'s'			;If command was "s", branch to status section of code
 			BEQ	SCode
 
 
-DCode			LDR	R1,=QRecord
+DCode			LDR	R1,=QRecord		;Dequeues
 			BL	Dequeue
 			BCS	DFailure
-			BL	PutChar
-			MOVS	R0,#COLON_CHAR
+			BL	PutChar			;Prints the dequeued character
+			MOVS	R0,#COLON_CHAR		;Prints ":"
 			BL	PutChar
 			B	EndDCode
 			
@@ -319,7 +319,7 @@ ECode			LDR	R0,=promptEnq		;Prints "Character to enqueue:"
 			BL	PutChar
 			MOVS	R0,R2
 			LDR	R1,=QRecord
-			BL	Enqueue
+			BL	Enqueue			;Enqueues a character
 			BCS	EFailure
 			LDR	R0,=success		;Prints "Success:"
 			MOVS	R1,#MAX_STRING
@@ -334,13 +334,13 @@ EFailure		LDR	R0,=failure		;Prints "Failure:"
 EndECode		B	StatusCode			
 			
 			
-HCode			LDR	R0,=promptHelp
+HCode			LDR	R0,=promptHelp		;Prints help message
 			MOVS	R1,#MAX_STRING
 			BL	PutStringSB
 			B	EndAndLoop
 
 			
-PCode			MOVS	R0,#GREATER_THAN_SYM
+PCode			MOVS	R0,#GREATER_THAN_SYM	;Prints ">"
 			BL	PutChar
 			
 			LDR	R1,=QRecord
@@ -359,7 +359,7 @@ PLoop			CMP	R2,#0			; if NumberEnqueued > 0
 			LDR	R4,[R1,#BUF_STRT]	;		Adjust OutPointer to BufferStart
 			B	PLoop
 			
-EndPCode		MOVS	R0,#LESS_THAN_SYM
+EndPCode		MOVS	R0,#LESS_THAN_SYM	;Prints "<"
 			BL	PutChar
 			B	EndAndLoop
 			
@@ -502,9 +502,9 @@ Init_UART0_IRQ	PROC	{R0-R13}
 			ENDP
 			LTORG
 ;****************************************************************				
-UART0_ISR	PROC	{}
+UART0_ISR	PROC	{R0-R13}
 ;****************************************************************
-; 
+; Handler for when an interrupt is received from the UART0
 ; Input
 ;	None
 ; Output
